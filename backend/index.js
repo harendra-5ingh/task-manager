@@ -30,7 +30,18 @@ const app = express()
 // Middleware to handle cors
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true); // allow Postman / server calls
+
+      const isVercel = /^https:\/\/task-manager.*\.vercel\.app$/.test(origin);
+      const isLocalhost = /^http:\/\/localhost:\d+$/.test(origin);
+
+      if (isVercel || isLocalhost) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS blocked: ${origin}`));
+      }
+    },
     credentials: true,
   })
 );
